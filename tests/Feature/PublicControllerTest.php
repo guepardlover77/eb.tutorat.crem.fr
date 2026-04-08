@@ -16,13 +16,14 @@ class PublicControllerTest extends TestCase
     private function makeStudent(array $attrs = []): Student
     {
         static $i = 0;
+
         return Student::create(array_merge([
             'helloasso_item_id' => ++$i,
-            'first_name'        => 'Test',
-            'last_name'         => 'User',
-            'email'             => "pub{$i}@test.com",
-            'tier_name'         => 'LAS 1 - INSCRITS au Tutorat',
-            'is_excluded'       => false,
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'email' => "pub{$i}@test.com",
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
+            'is_excluded' => false,
         ], $attrs));
     }
 
@@ -40,9 +41,9 @@ class PublicControllerTest extends TestCase
         $amphi = Amphitheater::create(['name' => 'Debré gauche', 'capacity' => 50, 'sort_order' => 1]);
         $this->makeStudent([
             'amphitheater_id' => $amphi->id,
-            'seat_number'     => '1',
-            'crem_number'     => '10001',
-            'is_excluded'     => false,
+            'seat_number' => '1',
+            'crem_number' => '10001',
+            'is_excluded' => false,
         ]);
 
         $this->get('/placement')->assertOk()->assertSee('Debré gauche');
@@ -61,9 +62,9 @@ class PublicControllerTest extends TestCase
         $amphi = Amphitheater::create(['name' => 'Debré gauche', 'capacity' => 50, 'sort_order' => 1]);
         $this->makeStudent([
             'amphitheater_id' => $amphi->id,
-            'seat_number'     => '1',
-            'crem_number'     => '70001',
-            'is_excluded'     => false,
+            'seat_number' => '1',
+            'crem_number' => '70001',
+            'is_excluded' => false,
         ]);
 
         // La Rochelle students (7xxx) are filtered out in placementData
@@ -89,9 +90,9 @@ class PublicControllerTest extends TestCase
         $amphi = Amphitheater::create(['name' => 'Rambaud', 'capacity' => 50, 'sort_order' => 1]);
         $this->makeStudent([
             'amphitheater_id' => $amphi->id,
-            'seat_number'     => '5',
-            'crem_number'     => '10001',
-            'is_excluded'     => false,
+            'seat_number' => '5',
+            'crem_number' => '10001',
+            'is_excluded' => false,
         ]);
 
         $response = $this->get('/placement/data')->assertOk();
@@ -111,9 +112,9 @@ class PublicControllerTest extends TestCase
         $amphi = Amphitheater::create(['name' => 'Tourette', 'capacity' => 50, 'sort_order' => 1]);
         $this->makeStudent([
             'amphitheater_id' => $amphi->id,
-            'seat_number'     => '1',
-            'crem_number'     => '10001',
-            'is_excluded'     => false,
+            'seat_number' => '1',
+            'crem_number' => '10001',
+            'is_excluded' => false,
         ]);
 
         $hash2 = $this->get('/placement/data')->json('hash');
@@ -140,10 +141,10 @@ class PublicControllerTest extends TestCase
     public function test_mon_numero_returns_crem_for_adherent(): void
     {
         $this->makeStudent([
-            'email'       => 'adherent@test.com',
+            'email' => 'adherent@test.com',
             'crem_number' => '10001',
-            'first_name'  => 'Alice',
-            'last_name'   => 'Martin',
+            'first_name' => 'Alice',
+            'last_name' => 'Martin',
         ]);
 
         $response = $this->post('/placement/mon-numero', ['email' => 'adherent@test.com']);
@@ -154,7 +155,7 @@ class PublicControllerTest extends TestCase
     public function test_mon_numero_returns_auto_status_for_8xxx_crem(): void
     {
         $this->makeStudent([
-            'email'       => 'auto@test.com',
+            'email' => 'auto@test.com',
             'crem_number' => '8001',
         ]);
 

@@ -4,16 +4,15 @@ namespace App\Exports;
 
 use App\Models\Amphitheater;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
-use Maatwebsite\Excel\Concerns\WithRowFormatting;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class EmargementExport implements FromCollection, WithHeadings, WithTitle, WithStyles, WithColumnWidths
+class EmargementExport implements FromCollection, WithColumnWidths, WithHeadings, WithStyles, WithTitle
 {
     private int $studentCount = 0;
 
@@ -29,12 +28,12 @@ class EmargementExport implements FromCollection, WithHeadings, WithTitle, WithS
 
         $this->studentCount = $students->count();
 
-        return $students->map(fn($s) => [
-            'N°'        => $i++,
-            'N° Place'  => $s->seat_number,
-            'N° CREM'   => $s->crem_number ?? '—',
-            'Nom'       => strtoupper($s->last_name),
-            'Prénom'    => $s->first_name,
+        return $students->map(fn ($s) => [
+            'N°' => $i++,
+            'N° Place' => $s->seat_number,
+            'N° CREM' => $s->crem_number ?? '—',
+            'Nom' => strtoupper($s->last_name),
+            'Prénom' => $s->first_name,
             'Signature' => '',
         ]);
     }
@@ -46,7 +45,7 @@ class EmargementExport implements FromCollection, WithHeadings, WithTitle, WithS
 
     public function title(): string
     {
-        return 'Émargement - ' . $this->amphitheater->name;
+        return 'Émargement - '.$this->amphitheater->name;
     }
 
     public function styles(Worksheet $sheet): array
@@ -64,13 +63,13 @@ class EmargementExport implements FromCollection, WithHeadings, WithTitle, WithS
         for ($row = 2; $row <= $lastRow; $row++) {
             $styles[$row] = [
                 'fill' => [
-                    'fillType'   => Fill::FILL_SOLID,
+                    'fillType' => Fill::FILL_SOLID,
                     'startColor' => ['rgb' => $row % 2 === 0 ? 'F0F4FF' : 'FFFFFF'],
                 ],
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
-                        'color'       => ['rgb' => 'CCCCCC'],
+                        'color' => ['rgb' => 'CCCCCC'],
                     ],
                 ],
             ];

@@ -4,14 +4,14 @@ namespace App\Exports\Sheets;
 
 use App\Models\Amphitheater;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class AmphiPlacementSheet implements FromCollection, WithHeadings, WithTitle, WithColumnWidths, WithEvents
+class AmphiPlacementSheet implements FromCollection, WithColumnWidths, WithEvents, WithHeadings, WithTitle
 {
     public function __construct(private readonly Amphitheater $amphitheater) {}
 
@@ -24,9 +24,9 @@ class AmphiPlacementSheet implements FromCollection, WithHeadings, WithTitle, Wi
             ->whereNotNull('seat_number')
             ->orderBySeat()
             ->get()
-            ->map(fn($s) => [
+            ->map(fn ($s) => [
                 'N° Place' => $s->seat_number,
-                'N° CREM'  => $s->crem_number ?? '—',
+                'N° CREM' => $s->crem_number ?? '—',
             ]);
     }
 
@@ -56,11 +56,11 @@ class AmphiPlacementSheet implements FromCollection, WithHeadings, WithTitle, Wi
 
                 $sheet->insertNewRowBefore(1, 1);
                 $sheet->mergeCells('A1:B1');
-                $sheet->setCellValue('A1', 'Amphi : ' . $this->amphitheater->name);
+                $sheet->setCellValue('A1', 'Amphi : '.$this->amphitheater->name);
 
                 $sheet->getStyle('A1')->applyFromArray([
-                    'font'      => ['bold' => true, 'size' => 13, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563EB']],
+                    'font' => ['bold' => true, 'size' => 13, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563EB']],
                     'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
                 ]);
 

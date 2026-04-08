@@ -15,25 +15,27 @@ class ExportControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Amphitheater $amphi;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user  = User::factory()->create();
+        $this->user = User::factory()->create();
         $this->amphi = Amphitheater::create(['name' => 'Debré gauche', 'capacity' => 50, 'sort_order' => 1]);
     }
 
     private function makeStudent(array $attrs = []): Student
     {
         static $i = 0;
+
         return Student::create(array_merge([
             'helloasso_item_id' => ++$i,
-            'first_name'        => 'Test',
-            'last_name'         => 'User',
-            'email'             => "export{$i}@test.com",
-            'tier_name'         => 'LAS 1 - INSCRITS au Tutorat',
-            'is_excluded'       => false,
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'email' => "export{$i}@test.com",
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
+            'is_excluded' => false,
         ], $attrs));
     }
 
@@ -144,7 +146,7 @@ class ExportControllerTest extends TestCase
         $this->assertNotEmpty($students);
         $names = array_column($students, 'nom');
         $this->assertTrue(
-            count(array_filter($names, fn($n) => str_contains(strtoupper($n), 'ERRORSTUDENT'))) > 0
+            count(array_filter($names, fn ($n) => str_contains(strtoupper($n), 'ERRORSTUDENT'))) > 0
         );
     }
 
@@ -171,7 +173,7 @@ class ExportControllerTest extends TestCase
         $students = $response->json('students');
         $names = array_column($students, 'nom');
         $this->assertTrue(
-            count(array_filter($names, fn($n) => str_contains(strtoupper($n), 'EXCLUDEDSTUDENT'))) === 0
+            count(array_filter($names, fn ($n) => str_contains(strtoupper($n), 'EXCLUDEDSTUDENT'))) === 0
         );
     }
 
@@ -191,9 +193,9 @@ class ExportControllerTest extends TestCase
     public function test_recuperation_emails_contains_excluded_students_without_recovery_option(): void
     {
         $this->makeStudent([
-            'is_excluded'     => true,
+            'is_excluded' => true,
             'recovery_option' => null,
-            'email'           => 'recup@test.com',
+            'email' => 'recup@test.com',
         ]);
 
         $response = $this->actingAs($this->user)
@@ -206,9 +208,9 @@ class ExportControllerTest extends TestCase
     public function test_recuperation_emails_excludes_students_with_recovery_option(): void
     {
         $this->makeStudent([
-            'is_excluded'     => true,
+            'is_excluded' => true,
             'recovery_option' => 'option_a',
-            'email'           => 'has-option@test.com',
+            'email' => 'has-option@test.com',
         ]);
 
         $response = $this->actingAs($this->user)

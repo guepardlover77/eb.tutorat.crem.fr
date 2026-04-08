@@ -67,18 +67,18 @@ class SyncControllerTest extends TestCase
         $mockHelloAsso = $this->createMock(HelloAssoService::class);
         $mockHelloAsso->method('fetchPage')->willReturn(['items' => [], 'next_cursor' => null]);
 
-        $this->mock(HelloAssoService::class, function ($mock) use ($mockHelloAsso) {
+        $this->mock(HelloAssoService::class, function ($mock) {
             $mock->shouldReceive('isConfigured')->andReturn(true);
             $mock->shouldReceive('fetchPage')->andReturn(['items' => [], 'next_cursor' => null]);
         });
 
         $mockService = $this->createMock(SyncService::class);
         $mockService->method('startSync')->willReturn([
-            'log_id'  => 1,
-            'new'     => 0,
+            'log_id' => 1,
+            'new' => 0,
             'updated' => 0,
             'skipped' => 0,
-            'done'    => true,
+            'done' => true,
         ]);
 
         $this->app->instance(SyncService::class, $mockService);
@@ -115,17 +115,17 @@ class SyncControllerTest extends TestCase
     public function test_chunk_processes_running_log(): void
     {
         $log = SyncLog::create([
-            'started_at'         => now(),
-            'status'             => 'running',
-            'new_records'        => 0,
-            'updated_records'    => 0,
+            'started_at' => now(),
+            'status' => 'running',
+            'new_records' => 0,
+            'updated_records' => 0,
             'continuation_token' => 'some_token',
         ]);
 
         $mockService = $this->createMock(SyncService::class);
         $mockService->method('continueSync')->willReturn([
-            'done'    => true,
-            'new'     => 0,
+            'done' => true,
+            'new' => 0,
             'updated' => 0,
         ]);
 
@@ -187,6 +187,7 @@ class SyncControllerTest extends TestCase
         // Static method — use config instead for isConfigured()
         config(['services.helloasso.client_id' => 'test-id']);
         config(['services.helloasso.client_secret' => 'test-secret']);
+
         return $mock;
     }
 }

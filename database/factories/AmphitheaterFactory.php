@@ -17,8 +17,8 @@ class AmphitheaterFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'       => fake()->unique()->words(2, true),
-            'capacity'   => fake()->numberBetween(50, 300),
+            'name' => fake()->unique()->words(2, true),
+            'capacity' => fake()->numberBetween(50, 300),
             'sort_order' => ++self::$sortOrder,
             'seat_layout' => null,
         ];

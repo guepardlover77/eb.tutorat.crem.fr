@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\SyncLog;
 use App\Services\HelloAssoService;
 use App\Services\SyncService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -24,24 +25,26 @@ class SyncServiceTest extends TestCase
     {
         $mock = $this->createMock(HelloAssoService::class);
         $mock->method('fetchPage')->willReturn([
-            'items'       => $items,
+            'items' => $items,
             'next_cursor' => $nextCursor,
         ]);
+
         return $mock;
     }
 
     private function makeItem(array $overrides = []): array
     {
         static $id = 100;
+
         return array_merge([
-            'id'    => ++$id,
+            'id' => ++$id,
             'state' => 'Processed',
-            'name'  => 'LAS 1 - INSCRITS au Tutorat',
+            'name' => 'LAS 1 - INSCRITS au Tutorat',
             'order' => ['id' => 1],
             'payer' => ['email' => "user{$id}@test.com"],
-            'user'  => ['firstName' => 'Test', 'lastName' => 'User'],
+            'user' => ['firstName' => 'Test', 'lastName' => 'User'],
             'customFields' => [
-                ['name' => 'Numéro CREM', 'type' => 'Number', 'answer' => '1000' . $id],
+                ['name' => 'Numéro CREM', 'type' => 'Number', 'answer' => '1000'.$id],
             ],
             'options' => [],
         ], $overrides);
@@ -72,7 +75,7 @@ class SyncServiceTest extends TestCase
 
         $this->assertDatabaseHas('students', [
             'helloasso_item_id' => $item['id'],
-            'first_name'        => 'Test',
+            'first_name' => 'Test',
         ]);
     }
 
@@ -132,12 +135,12 @@ class SyncServiceTest extends TestCase
         $item = $this->makeItem();
         Student::create([
             'helloasso_item_id' => $item['id'],
-            'first_name'        => 'Old',
-            'last_name'         => 'Name',
-            'email'             => 'old@test.com',
-            'tier_name'         => 'LAS 1 - INSCRITS au Tutorat',
-            'is_excluded'       => false,
-            'synced_at'         => now()->subDay(),
+            'first_name' => 'Old',
+            'last_name' => 'Name',
+            'email' => 'old@test.com',
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
+            'is_excluded' => false,
+            'synced_at' => now()->subDay(),
         ]);
 
         $updatedItem = array_merge($item, [
@@ -152,7 +155,7 @@ class SyncServiceTest extends TestCase
         $this->assertSame(1, $result['updated']);
         $this->assertDatabaseHas('students', [
             'helloasso_item_id' => $item['id'],
-            'first_name'        => 'New',
+            'first_name' => 'New',
         ]);
     }
 
@@ -161,13 +164,13 @@ class SyncServiceTest extends TestCase
         $item = $this->makeItem();
         Student::create([
             'helloasso_item_id' => $item['id'],
-            'first_name'        => 'ManuallyEdited',
-            'last_name'         => 'User',
-            'email'             => 'manual@test.com',
-            'tier_name'         => 'LAS 1 - INSCRITS au Tutorat',
-            'is_excluded'       => false,
-            'is_manually_edited'=> true,
-            'synced_at'         => now()->subDay(),
+            'first_name' => 'ManuallyEdited',
+            'last_name' => 'User',
+            'email' => 'manual@test.com',
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
+            'is_excluded' => false,
+            'is_manually_edited' => true,
+            'synced_at' => now()->subDay(),
         ]);
 
         $mock = $this->mockHelloAsso([$item]);
@@ -183,11 +186,11 @@ class SyncServiceTest extends TestCase
         $item = $this->makeItem();
         $student = Student::create([
             'helloasso_item_id' => $item['id'],
-            'first_name'        => 'Deleted',
-            'last_name'         => 'Student',
-            'email'             => 'deleted@test.com',
-            'tier_name'         => 'LAS 1 - INSCRITS au Tutorat',
-            'is_excluded'       => false,
+            'first_name' => 'Deleted',
+            'last_name' => 'Student',
+            'email' => 'deleted@test.com',
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
+            'is_excluded' => false,
         ]);
         $student->delete();
 
@@ -208,10 +211,10 @@ class SyncServiceTest extends TestCase
         $service = new SyncService($mock);
 
         $log = SyncLog::create([
-            'started_at'         => now(),
-            'status'             => 'running',
-            'new_records'        => 0,
-            'updated_records'    => 0,
+            'started_at' => now(),
+            'status' => 'running',
+            'new_records' => 0,
+            'updated_records' => 0,
             'continuation_token' => 'token_page2',
         ]);
 
@@ -223,8 +226,8 @@ class SyncServiceTest extends TestCase
     public function test_continue_sync_fails_if_log_not_running(): void
     {
         $log = SyncLog::create([
-            'started_at'  => now(),
-            'status'      => 'success',
+            'started_at' => now(),
+            'status' => 'success',
             'new_records' => 0,
             'updated_records' => 0,
         ]);
@@ -232,7 +235,7 @@ class SyncServiceTest extends TestCase
         $mock = $this->mockHelloAsso();
         $service = new SyncService($mock);
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
         $service->continueSync($log->id);
     }
 
@@ -262,11 +265,11 @@ class SyncServiceTest extends TestCase
 
         $student = Student::create([
             'helloasso_item_id' => 888,
-            'first_name'        => 'Deleted',
-            'last_name'         => 'Person',
-            'email'             => 'del@test.com',
-            'tier_name'         => 'LAS 1',
-            'is_excluded'       => false,
+            'first_name' => 'Deleted',
+            'last_name' => 'Person',
+            'email' => 'del@test.com',
+            'tier_name' => 'LAS 1',
+            'is_excluded' => false,
         ]);
         $student->delete();
 
@@ -287,11 +290,11 @@ class SyncServiceTest extends TestCase
 
         Student::create([
             'helloasso_item_id' => 777,
-            'first_name'        => 'Present',
-            'last_name'         => 'User',
-            'email'             => 'present@test.com',
-            'tier_name'         => 'LAS 1',
-            'is_excluded'       => false,
+            'first_name' => 'Present',
+            'last_name' => 'User',
+            'email' => 'present@test.com',
+            'tier_name' => 'LAS 1',
+            'is_excluded' => false,
         ]);
 
         $haItems = [

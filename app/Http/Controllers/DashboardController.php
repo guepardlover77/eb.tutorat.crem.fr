@@ -11,7 +11,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $row = Student::selectRaw("
+        $row = Student::selectRaw('
             COUNT(*) as total,
             SUM(CASE WHEN is_excluded = 0 THEN 1 ELSE 0 END) as to_place,
             SUM(CASE WHEN is_excluded = 1 THEN 1 ELSE 0 END) as excluded,
@@ -19,24 +19,24 @@ class DashboardController extends Controller
             SUM(CASE WHEN has_error = 1 THEN 1 ELSE 0 END) as errors,
             SUM(CASE WHEN is_excluded = 0 AND amphitheater_id IS NULL THEN 1 ELSE 0 END) as unplaced,
             SUM(CASE WHEN is_manually_placed = 1 THEN 1 ELSE 0 END) as manual
-        ")->first();
+        ')->first();
 
         $stats = [
-            'total'    => (int) ($row->total ?? 0),
+            'total' => (int) ($row->total ?? 0),
             'to_place' => (int) ($row->to_place ?? 0),
             'excluded' => (int) ($row->excluded ?? 0),
-            'placed'   => (int) ($row->placed ?? 0),
-            'errors'   => (int) ($row->errors ?? 0),
+            'placed' => (int) ($row->placed ?? 0),
+            'errors' => (int) ($row->errors ?? 0),
             'unplaced' => (int) ($row->unplaced ?? 0),
-            'manual'   => (int) ($row->manual ?? 0),
+            'manual' => (int) ($row->manual ?? 0),
         ];
 
         $amphitheaters = Amphitheater::withCount('students as placed_count')
             ->orderBy('sort_order')
             ->get()
-            ->map(fn($a) => [
-                'model'     => $a,
-                'placed'    => $a->placed_count,
+            ->map(fn ($a) => [
+                'model' => $a,
+                'placed' => $a->placed_count,
                 'fill_rate' => $a->seatCount() > 0
                     ? round(($a->placed_count / $a->seatCount()) * 100, 1)
                     : 0,

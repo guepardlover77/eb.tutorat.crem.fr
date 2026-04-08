@@ -11,14 +11,13 @@ use Illuminate\Support\Facades\Log;
 
 class SyncService
 {
-
     public function __construct(private readonly HelloAssoService $helloAsso) {}
 
     public function startSync(): array
     {
         $lock = Cache::lock('sync_helloasso', 300);
 
-        if (!$lock->get()) {
+        if (! $lock->get()) {
             throw new \RuntimeException('Une synchronisation est déjà en cours.');
         }
 
@@ -29,8 +28,8 @@ class SyncService
                 ->update(['status' => 'failed', 'finished_at' => now(), 'error_message' => 'Timeout']);
 
             $log = SyncLog::create([
-                'started_at'  => now(),
-                'status'      => 'running',
+                'started_at' => now(),
+                'status' => 'running',
                 'new_records' => 0,
                 'updated_records' => 0,
             ]);
@@ -66,40 +65,40 @@ class SyncService
         try {
             ['items' => $items, 'next_cursor' => $nextCursor] = $this->helloAsso->fetchPage($cursor);
 
-            [$new, $updated] = DB::transaction(fn() => $this->processItems($items));
+            [$new, $updated] = DB::transaction(fn () => $this->processItems($items));
 
-            $totalNew     = ($log->new_records ?? 0) + $new;
+            $totalNew = ($log->new_records ?? 0) + $new;
             $totalUpdated = ($log->updated_records ?? 0) + $updated;
-            $done         = $nextCursor === null;
+            $done = $nextCursor === null;
 
             if ($done) {
                 Cache::forget('crem_error_count');
                 $log->update([
-                    'finished_at'      => now(),
-                    'status'           => 'success',
-                    'new_records'      => $totalNew,
-                    'updated_records'  => $totalUpdated,
+                    'finished_at' => now(),
+                    'status' => 'success',
+                    'new_records' => $totalNew,
+                    'updated_records' => $totalUpdated,
                     'continuation_token' => null,
                 ]);
             } else {
                 $log->update([
-                    'new_records'        => $totalNew,
-                    'updated_records'    => $totalUpdated,
+                    'new_records' => $totalNew,
+                    'updated_records' => $totalUpdated,
                     'continuation_token' => $nextCursor,
                 ]);
             }
 
             return [
-                'log_id'     => $log->id,
-                'done'       => $done,
-                'new'        => $totalNew,
-                'updated'    => $totalUpdated,
+                'log_id' => $log->id,
+                'done' => $done,
+                'new' => $totalNew,
+                'updated' => $totalUpdated,
                 'next_cursor' => $nextCursor,
             ];
         } catch (\Throwable $e) {
             $log->update([
-                'finished_at'   => now(),
-                'status'        => 'failed',
+                'finished_at' => now(),
+                'status' => 'failed',
                 'error_message' => $e->getMessage(),
             ]);
 
@@ -114,7 +113,7 @@ class SyncService
 
         $processedItems = array_filter(
             $items,
-            fn($item) => ($item['state'] ?? '') === 'Processed'
+            fn ($item) => ($item['state'] ?? '') === 'Processed'
         );
 
         $results = [];
@@ -134,17 +133,17 @@ class SyncService
             }
 
             $results[] = [
-                'item_id'    => $item['id'],
+                'item_id' => $item['id'],
                 'first_name' => $item['user']['firstName'] ?? '',
-                'last_name'  => $item['user']['lastName'] ?? '',
-                'email'      => $item['payer']['email'] ?? $item['user']['email'] ?? '',
-                'tier_name'  => $item['name'] ?? '',
+                'last_name' => $item['user']['lastName'] ?? '',
+                'email' => $item['payer']['email'] ?? $item['user']['email'] ?? '',
+                'tier_name' => $item['name'] ?? '',
                 'crem_number' => $cremNumber,
             ];
         }
 
         return [
-            'items'       => $results,
+            'items' => $results,
             'next_cursor' => $nextCursor,
         ];
     }
@@ -164,7 +163,7 @@ class SyncService
         foreach ($helloAssoItems as $ha) {
             $student = $existing->get($ha['item_id']);
 
-            if (!$student) {
+            if (! $student) {
                 $missing[] = $ha;
             } elseif ($student->trashed()) {
                 $deleted[] = array_merge($ha, ['deleted_at' => $student->deleted_at->toDateTimeString()]);
@@ -176,12 +175,12 @@ class SyncService
 
     private function processItems(array $items): array
     {
-        $new     = 0;
+        $new = 0;
         $updated = 0;
 
         $processedItems = array_filter(
             $items,
-            fn($item) => ($item['state'] ?? '') === 'Processed'
+            fn ($item) => ($item['state'] ?? '') === 'Processed'
         );
 
         if (empty($processedItems)) {
@@ -189,19 +188,19 @@ class SyncService
         }
 
         // Batch-load existing students (including soft-deleted) to avoid N+1
-        $itemIds   = array_column($processedItems, 'id');
-        $existing  = Student::withTrashed()
+        $itemIds = array_column($processedItems, 'id');
+        $existing = Student::withTrashed()
             ->whereIn('helloasso_item_id', $itemIds)
             ->get()
             ->keyBy('helloasso_item_id');
 
         $detectKeys = ['first_name', 'last_name', 'email', 'tier_name', 'crem_number', 'crem_photo_url', 'is_excluded', 'recovery_option'];
-        $toCreate   = [];
-        $now        = now();
+        $toCreate = [];
+        $now = now();
 
         foreach ($processedItems as $item) {
-            $cremNumber     = null;
-            $cremPhotoUrl   = null;
+            $cremNumber = null;
+            $cremPhotoUrl = null;
             $recoveryOption = null;
 
             foreach ($item['customFields'] ?? [] as $field) {
@@ -221,21 +220,21 @@ class SyncService
                 }
             }
 
-            $tierName   = $item['name'] ?? '';
+            $tierName = $item['name'] ?? '';
             $isExcluded = $tierName === StudentConstants::EXCLUDED_TIER;
-            $email      = $item['payer']['email'] ?? $item['user']['email'] ?? '';
+            $email = $item['payer']['email'] ?? $item['user']['email'] ?? '';
 
             $attributes = [
                 'helloasso_order_id' => $item['order']['id'] ?? null,
-                'first_name'         => $item['user']['firstName'] ?? '',
-                'last_name'          => $item['user']['lastName'] ?? '',
-                'email'              => $email,
-                'tier_name'          => $tierName,
-                'crem_number'        => $cremNumber ? ltrim($cremNumber, '0') : null,
-                'crem_photo_url'     => $cremPhotoUrl,
-                'is_excluded'        => $isExcluded,
-                'recovery_option'    => $isExcluded ? $recoveryOption : null,
-                'synced_at'          => $now,
+                'first_name' => $item['user']['firstName'] ?? '',
+                'last_name' => $item['user']['lastName'] ?? '',
+                'email' => $email,
+                'tier_name' => $tierName,
+                'crem_number' => $cremNumber ? ltrim($cremNumber, '0') : null,
+                'crem_photo_url' => $cremPhotoUrl,
+                'is_excluded' => $isExcluded,
+                'recovery_option' => $isExcluded ? $recoveryOption : null,
+                'synced_at' => $now,
             ];
 
             $student = $existing->get($item['id']);
@@ -249,21 +248,22 @@ class SyncService
                 // Respect manual edits — don't overwrite fields changed in the dashboard
                 if ($student->is_manually_edited) {
                     $student->update(['synced_at' => $now]);
+
                     continue;
                 }
 
                 // Preserve auto-assigned 8xxx CREM numbers
-                if ($student->crem_number && str_starts_with($student->crem_number, '8') && !$attributes['crem_number']) {
+                if ($student->crem_number && str_starts_with($student->crem_number, '8') && ! $attributes['crem_number']) {
                     $attributes['crem_number'] = $student->crem_number;
                 }
 
                 $changed = array_filter(
                     array_intersect_key($attributes, array_flip($detectKeys)),
-                    fn($value, $key) => (string) $student->$key !== (string) $value,
+                    fn ($value, $key) => (string) $student->$key !== (string) $value,
                     ARRAY_FILTER_USE_BOTH
                 );
 
-                if (!empty($changed)) {
+                if (! empty($changed)) {
                     $student->update($attributes);
                     $updated++;
                 } else {
@@ -277,14 +277,14 @@ class SyncService
 
                 $toCreate[] = array_merge($attributes, [
                     'helloasso_item_id' => $item['id'],
-                    'created_at'        => $now,
-                    'updated_at'        => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
                 ]);
                 $new++;
             }
         }
 
-        if (!empty($toCreate)) {
+        if (! empty($toCreate)) {
             Student::insert($toCreate);
         }
 

@@ -44,15 +44,16 @@ class PlacementControllerTest extends TestCase
     private function makeStudent(array $attrs = []): Student
     {
         static $i = 0;
+
         return Student::create(array_merge([
             'helloasso_item_id' => ++$i,
-            'first_name'        => 'Test',
-            'last_name'         => 'Student',
-            'email'             => "student{$i}@test.com",
-            'tier_name'         => 'LAS 1 - INSCRITS au Tutorat',
-            'crem_number'       => '1000' . $i,
-            'is_excluded'       => false,
-            'is_manually_placed'=> false,
+            'first_name' => 'Test',
+            'last_name' => 'Student',
+            'email' => "student{$i}@test.com",
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
+            'crem_number' => '1000'.$i,
+            'is_excluded' => false,
+            'is_manually_placed' => false,
         ], $attrs));
     }
 
@@ -125,8 +126,8 @@ class PlacementControllerTest extends TestCase
 
     public function test_reset_preserves_manual_when_include_manual_false(): void
     {
-        $amphi  = Amphitheater::first();
-        $auto   = $this->makeStudent(['amphitheater_id' => $amphi->id, 'seat_number' => '1', 'is_manually_placed' => false]);
+        $amphi = Amphitheater::first();
+        $auto = $this->makeStudent(['amphitheater_id' => $amphi->id, 'seat_number' => '1', 'is_manually_placed' => false]);
         $manual = $this->makeStudent(['amphitheater_id' => $amphi->id, 'seat_number' => '2', 'is_manually_placed' => true]);
 
         $this->actingAs($this->user)

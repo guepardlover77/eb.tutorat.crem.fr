@@ -1,4 +1,5 @@
 <?php
+
 // tests/Feature/TutoringImportControllerTest.php
 
 declare(strict_types=1);
@@ -19,7 +20,7 @@ class TutoringImportControllerTest extends TestCase
 
     private function createExcelFile(array $rows): UploadedFile
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         foreach ($rows as $rowIndex => $row) {
@@ -28,7 +29,7 @@ class TutoringImportControllerTest extends TestCase
             }
         }
 
-        $path = tempnam(sys_get_temp_dir(), 'test_import_') . '.xls';
+        $path = tempnam(sys_get_temp_dir(), 'test_import_').'.xls';
         (new Xls($spreadsheet))->save($path);
 
         return new UploadedFile($path, 'import.xls', 'application/vnd.ms-excel', null, true);
@@ -110,12 +111,12 @@ class TutoringImportControllerTest extends TestCase
 
     public function test_corrupt_excel_file_returns_error(): void
     {
-        /** @var \App\Models\User $user */
-        $user = \App\Models\User::factory()->create();
+        /** @var User $user */
+        $user = User::factory()->create();
         $this->actingAs($user);
 
         // A plain text file disguised as xlsx — passes mimes validation, fails parsing
-        $fakeExcel = \Illuminate\Http\UploadedFile::fake()->createWithContent(
+        $fakeExcel = UploadedFile::fake()->createWithContent(
             'corrupt.xlsx',
             'this is not valid excel content'
         );

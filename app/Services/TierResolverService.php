@@ -23,15 +23,15 @@ class TierResolverService
         $prefix = $cremNumber[0] ?? '';
 
         return match ($prefix) {
-            '7'     => throw new InvalidArgumentException(
+            '7' => throw new InvalidArgumentException(
                 'Ce numéro correspond à un établissement La Rochelle, non pris en charge ici.'
             ),
-            '1'     => new TierResult(
+            '1' => new TierResult(
                 TutoringMember::where('crem_number', $cremNumber)->exists()
                     ? 'las1_adherent'
                     : 'las1_adherent_sans_tuto'
             ),
-            '9'     => new TierResult(
+            '9' => new TierResult(
                 TutoringMember::where('crem_number', $cremNumber)->exists()
                     ? 'las2_adherent'
                     : 'las2_adherent_sans_tuto'
@@ -45,8 +45,8 @@ class TierResolverService
     private function resolveFromLevel(?string $lasLevel): TierResult
     {
         return match ($lasLevel) {
-            'las1'  => new TierResult('las1_non_adherent'),
-            'las2'  => new TierResult('las2_non_adherent'),
+            'las1' => new TierResult('las1_non_adherent'),
+            'las2' => new TierResult('las2_non_adherent'),
             default => throw new InvalidArgumentException(
                 'Sélectionnez votre niveau LAS si vous n\'avez pas de numéro CREM.'
             ),

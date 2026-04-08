@@ -13,8 +13,8 @@ class AdminUserSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'admin@crem-poitiers.fr'],
             [
-                'name'     => 'Admin CREM',
-                'email'    => 'admin@crem-poitiers.fr',
+                'name' => 'Admin CREM',
+                'email' => 'admin@crem-poitiers.fr',
                 'password' => Hash::make('changeme'),
             ]
         );

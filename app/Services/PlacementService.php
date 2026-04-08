@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class PlacementService
 {
-
     private const LAS1_TIERS = [
         'LAS 1 - INSCRITS au Tutorat',
         'LAS 1 - INSCRITS AU CREM SANS le Tutorat',
@@ -37,7 +36,7 @@ class PlacementService
     {
         return Student::where('is_excluded', false)
             ->where('is_manually_placed', false)
-            ->where(fn($q) => $q->whereNull('crem_number')->orWhere('crem_number', 'NOT LIKE', '7%'));
+            ->where(fn ($q) => $q->whereNull('crem_number')->orWhere('crem_number', 'NOT LIKE', '7%'));
     }
 
     public function run(): array
@@ -59,9 +58,9 @@ class PlacementService
             $students = $this->deduplicateByEmail($students);
 
             // Step 3: build groups
-            $groupDebre   = $this->buildDebreGroup($students);
-            $groupCome    = $this->buildComeGroup($students);
-            $groupBeauch  = $this->buildBeauchGroup($students);
+            $groupDebre = $this->buildDebreGroup($students);
+            $groupCome = $this->buildComeGroup($students);
+            $groupBeauch = $this->buildBeauchGroup($students);
             $groupRambaud = $this->buildRambaudGroup($students);
 
             // Step 3: fill amphitheaters in priority order
@@ -70,7 +69,7 @@ class PlacementService
             $overflowCome = $this->fillAmphis(['Côme Bas', 'Côme Haut'], $groupCome);
 
             // Beauchamps: LAS 2/3 non-members first, then Come overflow
-            $beauchQueue  = $groupBeauch->concat($overflowCome);
+            $beauchQueue = $groupBeauch->concat($overflowCome);
             $overflowBeauch = $this->fillAmphis(['Beauchamps'], $beauchQueue);
 
             $overflowRambaud = $this->fillAmphis(['Rambaud'], $groupRambaud);
@@ -87,9 +86,9 @@ class PlacementService
             Cache::forget('crem_error_count');
 
             return [
-                'placed'   => Student::whereNotNull('amphitheater_id')->count(),
+                'placed' => Student::whereNotNull('amphitheater_id')->count(),
                 'unplaced' => Student::where('is_excluded', false)->whereNull('amphitheater_id')->count(),
-                'errors'   => Student::where('has_error', true)->count(),
+                'errors' => Student::where('has_error', true)->count(),
             ];
         });
     }
@@ -97,7 +96,7 @@ class PlacementService
     private function assignSeats(): void
     {
         $amphis = Amphitheater::whereNotNull('seat_layout')
-            ->with(['students' => fn($q) => $q->orderByRaw("CAST(crem_number AS INTEGER) ASC")])
+            ->with(['students' => fn ($q) => $q->orderByRaw('CAST(crem_number AS INTEGER) ASC')])
             ->get();
 
         foreach ($amphis as $amphi) {
@@ -181,36 +180,36 @@ class PlacementService
     private function detectErrorsBatch(Collection $students): void
     {
         $err1Ids = $students
-            ->filter(fn(Student $s) => $s->cremPrefix() === '1' && in_array($s->tier_name, self::LAS2_TIERS))
+            ->filter(fn (Student $s) => $s->cremPrefix() === '1' && in_array($s->tier_name, self::LAS2_TIERS))
             ->pluck('id');
 
         $err9Ids = $students
-            ->filter(fn(Student $s) => $s->cremPrefix() === '9' && in_array($s->tier_name, self::LAS1_TIERS))
+            ->filter(fn (Student $s) => $s->cremPrefix() === '9' && in_array($s->tier_name, self::LAS1_TIERS))
             ->pluck('id');
 
         // Detect duplicate emails (appearing more than once)
         $duplicateEmails = $students
-            ->filter(fn(Student $s) => $s->email !== null)
-            ->groupBy(fn(Student $s) => strtolower(trim($s->email)))
-            ->filter(fn($group) => $group->count() > 1)
+            ->filter(fn (Student $s) => $s->email !== null)
+            ->groupBy(fn (Student $s) => strtolower(trim($s->email)))
+            ->filter(fn ($group) => $group->count() > 1)
             ->keys();
 
         $dupIds = $students
-            ->filter(fn(Student $s) => $duplicateEmails->contains(strtolower(trim($s->email ?? ''))))
+            ->filter(fn (Student $s) => $duplicateEmails->contains(strtolower(trim($s->email ?? ''))))
             ->pluck('id');
 
         $errorIds = $err1Ids->merge($err9Ids)->merge($dupIds)->unique();
-        $okIds    = $students->pluck('id')->diff($errorIds);
+        $okIds = $students->pluck('id')->diff($errorIds);
 
         if ($err1Ids->isNotEmpty()) {
             Student::whereIn('id', $err1Ids)->update([
-                'has_error'     => true,
+                'has_error' => true,
                 'error_message' => 'Numéro CREM commençant par 1 incompatible avec le tarif LAS 2/3',
             ]);
         }
         if ($err9Ids->isNotEmpty()) {
             Student::whereIn('id', $err9Ids)->update([
-                'has_error'     => true,
+                'has_error' => true,
                 'error_message' => 'Numéro CREM commençant par 9 incompatible avec le tarif LAS 1',
             ]);
         }
@@ -219,7 +218,7 @@ class PlacementService
             $pureUniqueIds = $dupIds->diff($err1Ids)->diff($err9Ids);
             if ($pureUniqueIds->isNotEmpty()) {
                 Student::whereIn('id', $pureUniqueIds)->update([
-                    'has_error'     => true,
+                    'has_error' => true,
                     'error_message' => 'Adresse email en doublon',
                 ]);
             }
@@ -235,7 +234,7 @@ class PlacementService
         $manualEmails = Student::where('is_manually_placed', true)
             ->whereNotNull('email')
             ->pluck('email')
-            ->map(fn($e) => strtolower(trim($e)))
+            ->map(fn ($e) => strtolower(trim($e)))
             ->unique();
 
         $excludedIds = collect();
@@ -245,17 +244,17 @@ class PlacementService
             if ($s->email && $manualEmails->contains(strtolower(trim($s->email)))) {
                 $excludedIds->push($s->id);
                 Student::where('id', $s->id)->update([
-                    'has_error'     => true,
+                    'has_error' => true,
                     'error_message' => 'Doublon email — déjà placé manuellement',
                 ]);
             }
         }
 
-        $remaining = $students->reject(fn(Student $s) => $excludedIds->contains($s->id));
+        $remaining = $students->reject(fn (Student $s) => $excludedIds->contains($s->id));
 
         $groups = $remaining
-            ->filter(fn(Student $s) => $s->email !== null && $s->email !== '')
-            ->groupBy(fn(Student $s) => strtolower(trim($s->email)));
+            ->filter(fn (Student $s) => $s->email !== null && $s->email !== '')
+            ->groupBy(fn (Student $s) => strtolower(trim($s->email)));
 
         foreach ($groups as $email => $group) {
             if ($group->count() <= 1) {
@@ -265,7 +264,7 @@ class PlacementService
             // If all students in the group have different non-null CREM numbers,
             // they are distinct people (e.g., siblings with same parent email)
             $cremNumbers = $group
-                ->filter(fn(Student $s) => $s->crem_number !== null)
+                ->filter(fn (Student $s) => $s->crem_number !== null)
                 ->pluck('crem_number')
                 ->unique();
 
@@ -279,11 +278,12 @@ class PlacementService
             // 3. Highest ID (most recent) as tiebreaker
             $sorted = $group->sortByDesc(function (Student $s) {
                 $cremScore = match (true) {
-                    $s->crem_number !== null && !str_starts_with($s->crem_number, '8') => 2,
+                    $s->crem_number !== null && ! str_starts_with($s->crem_number, '8') => 2,
                     $s->crem_number !== null => 1,
                     default => 0,
                 };
                 $excludedScore = $s->is_excluded ? 0 : 1;
+
                 return sprintf('%d_%d_%010d', $excludedScore, $cremScore, $s->id);
             });
 
@@ -293,14 +293,14 @@ class PlacementService
             $dupIds = $duplicates->pluck('id');
             $excludedIds = $excludedIds->merge($dupIds);
 
-            $keptName = strtoupper($kept->last_name) . ' ' . $kept->first_name;
+            $keptName = strtoupper($kept->last_name).' '.$kept->first_name;
             Student::whereIn('id', $dupIds)->update([
-                'has_error'     => true,
+                'has_error' => true,
                 'error_message' => "Doublon email — exclu du placement (retenu : {$keptName}, CREM {$kept->crem_number})",
             ]);
         }
 
-        return $students->reject(fn(Student $s) => $excludedIds->contains($s->id))->values();
+        return $students->reject(fn (Student $s) => $excludedIds->contains($s->id))->values();
     }
 
     // Debré: All LAS1 members (Tutorat or CREM-sans-Tutorat), sorted CREM 1xxx first then 7xxx then others
@@ -313,15 +313,16 @@ class PlacementService
         ];
 
         return $students
-            ->filter(fn(Student $s) => in_array($s->tier_name, $memberLas1))
+            ->filter(fn (Student $s) => in_array($s->tier_name, $memberLas1))
             ->sortBy(function (Student $s) {
                 $prefix = $s->cremPrefix();
-                $order  = match ($prefix) {
-                    '1'   => 0,
-                    '7'   => 1,
-                    null  => 3,
+                $order = match ($prefix) {
+                    '1' => 0,
+                    '7' => 1,
+                    null => 3,
                     default => 2,
                 };
+
                 return sprintf('%d_%06d', $order, (int) $s->crem_number);
             })
             ->values();
@@ -337,10 +338,11 @@ class PlacementService
                     'LAS 2/3 - INSCRITS AU CREM SANS le Tutorat',
                 ]);
                 $prefix = $s->cremPrefix();
+
                 // Exclude errors (CREM 1xxx with LAS2 tariff - already flagged)
                 return $isMemberLas2 && $prefix !== '1';
             })
-            ->sortBy(fn(Student $s) => $s->crem_number ? (int) $s->crem_number : PHP_INT_MAX)
+            ->sortBy(fn (Student $s) => $s->crem_number ? (int) $s->crem_number : PHP_INT_MAX)
             ->values();
     }
 
@@ -348,8 +350,8 @@ class PlacementService
     private function buildBeauchGroup(Collection $students): Collection
     {
         return $students
-            ->filter(fn(Student $s) => $s->tier_name === 'LAS 2/3 - NON INSCRITS au Tutorat')
-            ->sortBy(fn(Student $s) => $s->crem_number ? (int) $s->crem_number : PHP_INT_MAX)
+            ->filter(fn (Student $s) => $s->tier_name === 'LAS 2/3 - NON INSCRITS au Tutorat')
+            ->sortBy(fn (Student $s) => $s->crem_number ? (int) $s->crem_number : PHP_INT_MAX)
             ->values();
     }
 
@@ -357,8 +359,8 @@ class PlacementService
     private function buildRambaudGroup(Collection $students): Collection
     {
         return $students
-            ->filter(fn(Student $s) => $s->tier_name === 'LAS 1 - NON INSCRITS au Tutorat')
-            ->sortBy(fn(Student $s) => $s->crem_number ? (int) $s->crem_number : PHP_INT_MAX)
+            ->filter(fn (Student $s) => $s->tier_name === 'LAS 1 - NON INSCRITS au Tutorat')
+            ->sortBy(fn (Student $s) => $s->crem_number ? (int) $s->crem_number : PHP_INT_MAX)
             ->values();
     }
 
@@ -374,7 +376,9 @@ class PlacementService
 
         foreach ($amphiNames as $name) {
             $amphi = $amphis[$name] ?? null;
-            if (!$amphi) continue;
+            if (! $amphi) {
+                continue;
+            }
 
             $currentCount = $amphi->students_count;
             $limit = $amphi->seat_layout ? count($amphi->seat_layout) : $amphi->capacity;
@@ -386,7 +390,7 @@ class PlacementService
                 $currentCount++;
             }
 
-            if (!empty($batchIds)) {
+            if (! empty($batchIds)) {
                 Student::whereIn('id', $batchIds)->update(['amphitheater_id' => $amphi->id]);
             }
         }

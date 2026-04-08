@@ -5,14 +5,14 @@ namespace App\Exports\Sheets;
 use App\Models\Amphitheater;
 use App\Models\Student;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class RecapPlacementSheet implements FromCollection, WithHeadings, WithTitle, WithStyles, WithColumnWidths
+class RecapPlacementSheet implements FromCollection, WithColumnWidths, WithHeadings, WithStyles, WithTitle
 {
     public function collection()
     {
@@ -24,12 +24,12 @@ class RecapPlacementSheet implements FromCollection, WithHeadings, WithTitle, Wi
             ->whereNotNull('amphitheater_id')
             ->with('amphitheater')
             ->get()
-            ->sortBy(fn($s) => $amphiIds->search($s->amphitheater_id))
+            ->sortBy(fn ($s) => $amphiIds->search($s->amphitheater_id))
             ->values()
-            ->map(fn($s) => [
+            ->map(fn ($s) => [
                 'N° Place' => $s->seat_number,
-                'N° CREM'  => $s->crem_number ?? '—',
-                'Amphi'    => $s->amphitheater->name,
+                'N° CREM' => $s->crem_number ?? '—',
+                'Amphi' => $s->amphitheater->name,
             ]);
     }
 

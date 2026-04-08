@@ -27,9 +27,9 @@ class InscriptionControllerTest extends TestCase
     {
         $response = $this->withSession([
             '_flash' => ['new' => ['tier_key', 'tier_label', 'form_slug'], 'old' => []],
-            'tier_key'   => 'las1_adherent',
+            'tier_key' => 'las1_adherent',
             'tier_label' => 'LAS 1 - ADHERENT',
-            'form_slug'  => 'mon-formulaire-test',
+            'form_slug' => 'mon-formulaire-test',
         ])->get('/inscriptions');
 
         $response->assertStatus(200);
@@ -70,7 +70,7 @@ class InscriptionControllerTest extends TestCase
 
         $response = $this->post('/inscriptions/check-tier', [
             'crem_number' => '',
-            'las_level'   => 'las1',
+            'las_level' => 'las1',
         ]);
 
         $response->assertRedirect('/inscriptions');

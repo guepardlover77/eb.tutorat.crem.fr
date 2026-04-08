@@ -27,7 +27,7 @@ Route::get('/placement/data', [PublicController::class, 'placementData'])->name(
 Route::match(['get', 'post'], '/placement/mon-numero', [PublicController::class, 'monNumero'])->name('public.mon-numero')->middleware('throttle:10,1');
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', fn() => view('auth.login'))->name('login');
+    Route::get('/login', fn () => view('auth.login'))->name('login');
     Route::get('/auth/google', [GoogleAuthController::class, 'redirect'])->name('auth.google');
     Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
 });

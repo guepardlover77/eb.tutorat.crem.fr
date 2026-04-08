@@ -15,25 +15,27 @@ class AttendanceControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Amphitheater $amphi;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user  = User::factory()->create();
+        $this->user = User::factory()->create();
         $this->amphi = Amphitheater::create(['name' => 'Salle A', 'capacity' => 50, 'sort_order' => 1]);
     }
 
     private function makeStudent(array $attrs = []): Student
     {
         static $i = 0;
+
         return Student::create(array_merge([
             'helloasso_item_id' => ++$i,
-            'first_name'        => 'Test',
-            'last_name'         => 'Student',
-            'email'             => "s{$i}@test.com",
-            'tier_name'         => 'LAS 1 - INSCRITS au Tutorat',
-            'is_excluded'       => false,
+            'first_name' => 'Test',
+            'last_name' => 'Student',
+            'email' => "s{$i}@test.com",
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
+            'is_excluded' => false,
         ], $attrs));
     }
 
@@ -167,7 +169,7 @@ class AttendanceControllerTest extends TestCase
 
         $this->assertDatabaseMissing('students', [
             'amphitheater_id' => $this->amphi->id,
-            'is_present'      => true,
+            'is_present' => true,
         ]);
     }
 

@@ -18,7 +18,7 @@ class GoogleAuthController extends Controller
         $googleUser = Socialite::driver('google')->stateless()->user();
 
         $whitelist = config('services.auth_whitelist');
-        if (!in_array($googleUser->getEmail(), $whitelist)) {
+        if (! in_array($googleUser->getEmail(), $whitelist)) {
             return redirect('/login')->withErrors(['email' => 'Accès non autorisé.']);
         }
 

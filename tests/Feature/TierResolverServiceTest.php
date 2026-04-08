@@ -19,7 +19,7 @@ class TierResolverServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new TierResolverService();
+        $this->service = new TierResolverService;
     }
 
     // --- CREM 1xxx ---

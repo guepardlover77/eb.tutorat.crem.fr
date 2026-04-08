@@ -1,12 +1,13 @@
 <?php
+
 // tests/Feature/WebhookControllerTest.php
 
 declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Models\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class WebhookControllerTest extends TestCase
@@ -29,20 +30,20 @@ class WebhookControllerTest extends TestCase
         return array_merge([
             'eventType' => 'Order',
             'data' => [
-                'id'       => 999,
-                'state'    => 'Processed',
+                'id' => 999,
+                'state' => 'Processed',
                 'formSlug' => 'slug-las1',
                 'formType' => 'Event',
-                'payer'    => [
-                    'email'     => 'jean.dupont@example.com',
+                'payer' => [
+                    'email' => 'jean.dupont@example.com',
                     'firstName' => 'Jean',
-                    'lastName'  => 'Dupont',
+                    'lastName' => 'Dupont',
                 ],
                 'items' => [
                     [
-                        'id'    => 12345,
+                        'id' => 12345,
                         'state' => 'Processed',
-                        'user'  => ['firstName' => 'Jean', 'lastName' => 'Dupont'],
+                        'user' => ['firstName' => 'Jean', 'lastName' => 'Dupont'],
                         'customFields' => [
                             ['name' => 'Numéro CREM', 'answer' => '10001'],
                         ],
@@ -52,10 +53,10 @@ class WebhookControllerTest extends TestCase
         ], $overrides);
     }
 
-    private function sendWebhook(array $payload, ?string $secret = null): \Illuminate\Testing\TestResponse
+    private function sendWebhook(array $payload, ?string $secret = null): TestResponse
     {
-        $body      = json_encode($payload);
-        $secret  ??= 'test-webhook-secret';
+        $body = json_encode($payload);
+        $secret ??= 'test-webhook-secret';
         $signature = base64_encode(hash_hmac('sha256', $body, $secret, true));
 
         return $this->call(
@@ -75,13 +76,13 @@ class WebhookControllerTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('students', [
-            'helloasso_item_id'  => 12345,
+            'helloasso_item_id' => 12345,
             'helloasso_order_id' => 999,
-            'email'              => 'jean.dupont@example.com',
-            'first_name'         => 'Jean',
-            'last_name'          => 'Dupont',
-            'crem_number'        => '10001',
-            'tier_name'          => 'LAS 1 - ADHERENT',
+            'email' => 'jean.dupont@example.com',
+            'first_name' => 'Jean',
+            'last_name' => 'Dupont',
+            'crem_number' => '10001',
+            'tier_name' => 'LAS 1 - ADHERENT',
         ]);
     }
 

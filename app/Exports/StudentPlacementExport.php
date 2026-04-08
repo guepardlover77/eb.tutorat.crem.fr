@@ -11,9 +11,9 @@ class StudentPlacementExport implements WithMultipleSheets
 {
     public function sheets(): array
     {
-        $sheets = [new RecapPlacementSheet()];
+        $sheets = [new RecapPlacementSheet];
 
-        $amphis = Amphitheater::withCount(['students as placed_count' => fn($q) => $q
+        $amphis = Amphitheater::withCount(['students as placed_count' => fn ($q) => $q
             ->where('is_excluded', false)
             ->where('has_error', false)
             ->whereNotNull('seat_number'),

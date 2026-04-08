@@ -31,7 +31,10 @@ class Amphitheater extends Model
     public function fillRate(): float
     {
         $total = $this->seatCount();
-        if ($total === 0) return 0;
+        if ($total === 0) {
+            return 0;
+        }
+
         return round(($this->placedCount() / $total) * 100, 1);
     }
 }

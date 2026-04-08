@@ -34,14 +34,14 @@ class Student extends Model
     ];
 
     protected $casts = [
-        'is_excluded'        => 'boolean',
-        'has_error'          => 'boolean',
+        'is_excluded' => 'boolean',
+        'has_error' => 'boolean',
         'is_manually_placed' => 'boolean',
         'is_manually_edited' => 'boolean',
-        'is_present'         => 'boolean',
-        'seat_number'        => 'string',
-        'synced_at'          => 'datetime',
-        'marked_present_at'  => 'datetime',
+        'is_present' => 'boolean',
+        'seat_number' => 'string',
+        'synced_at' => 'datetime',
+        'marked_present_at' => 'datetime',
     ];
 
     public function amphitheater(): BelongsTo
@@ -68,7 +68,7 @@ class Student extends Model
 
     public function fullName(): string
     {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->first_name.' '.$this->last_name;
     }
 
     public function cremPrefix(): ?string

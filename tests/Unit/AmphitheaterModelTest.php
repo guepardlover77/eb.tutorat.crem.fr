@@ -11,10 +11,11 @@ class AmphitheaterModelTest extends TestCase
 {
     private function make(array $attrs = []): Amphitheater
     {
-        $a = new Amphitheater();
+        $a = new Amphitheater;
         foreach (array_merge(['capacity' => 100, 'seat_layout' => null], $attrs) as $k => $v) {
             $a->$k = $v;
         }
+
         return $a;
     }
 

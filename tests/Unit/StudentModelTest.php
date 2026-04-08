@@ -11,10 +11,11 @@ class StudentModelTest extends TestCase
 {
     private function make(array $attrs = []): Student
     {
-        $s = new Student();
+        $s = new Student;
         foreach ($attrs as $k => $v) {
             $s->$k = $v;
         }
+
         return $s;
     }
 

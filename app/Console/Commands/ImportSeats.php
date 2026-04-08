@@ -7,7 +7,8 @@ use Illuminate\Console\Command;
 
 class ImportSeats extends Command
 {
-    protected $signature   = 'import:seats';
+    protected $signature = 'import:seats';
+
     protected $description = 'Importe les plans de salle depuis le fichier Excel';
 
     public function handle(SeatLayoutService $service): int
@@ -25,6 +26,7 @@ class ImportSeats extends Command
         }
 
         $this->info('Import terminé.');
+
         return Command::SUCCESS;
     }
 }

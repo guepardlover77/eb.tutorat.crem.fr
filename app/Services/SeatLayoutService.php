@@ -13,15 +13,15 @@ class SeatLayoutService
     private const EXCEL_FILE = 'LAS - Plan des amphis - 25 26.xlsx';
 
     private const SHEET_MAPPING = [
-        'COME BAS'     => 'Côme Bas',
-        'COME HAUT'    => 'Côme Haut',
+        'COME BAS' => 'Côme Bas',
+        'COME HAUT' => 'Côme Haut',
         'DEBRE GAUCHE' => 'Debré gauche',
-        'DEBRE DROIT'  => 'Debré droit',
-        'DEBRE HAUT'   => 'Debré haut',
-        'RAMBAUD'      => 'Rambaud',
-        'TOURETTE'     => 'Tourette',
-        'BEAUCHAMP'    => 'Beauchamps',
-        'LEFEVRE'      => 'Lefèvre',
+        'DEBRE DROIT' => 'Debré droit',
+        'DEBRE HAUT' => 'Debré haut',
+        'RAMBAUD' => 'Rambaud',
+        'TOURETTE' => 'Tourette',
+        'BEAUCHAMP' => 'Beauchamps',
+        'LEFEVRE' => 'Lefèvre',
     ];
 
     public function importAll(): array
@@ -37,8 +37,9 @@ class SeatLayoutService
 
         foreach (self::SHEET_MAPPING as $sheetName => $amphiName) {
             $sheet = $spreadsheet->getSheetByName($sheetName);
-            if (!$sheet) {
+            if (! $sheet) {
                 $results[$amphiName] = ['status' => 'sheet_not_found'];
+
                 continue;
             }
 
@@ -66,14 +67,14 @@ class SeatLayoutService
 
         foreach ($sheet->getRowIterator(1, $maxRow) as $row) {
             foreach ($row->getCellIterator('A', $maxColLetter) as $cell) {
-                if (!$this->isOrangeCell($sheet, $cell->getCoordinate())) {
+                if (! $this->isOrangeCell($sheet, $cell->getCoordinate())) {
                     continue;
                 }
                 $val = $cell->getCalculatedValue();
                 if (is_numeric($val) && (int) $val > 0) {
                     $seats[] = (int) $val;
                 } elseif (preg_match('/^table\s*(\d+)$/i', trim((string) $val), $m)) {
-                    $seats[] = 'Table ' . $m[1];
+                    $seats[] = 'Table '.$m[1];
                 }
             }
         }
@@ -82,9 +83,16 @@ class SeatLayoutService
         usort($seats, function ($a, $b) {
             $aIsString = is_string($a);
             $bIsString = is_string($b);
-            if ($aIsString && $bIsString) return strnatcmp($a, $b);
-            if ($aIsString) return -1;
-            if ($bIsString) return 1;
+            if ($aIsString && $bIsString) {
+                return strnatcmp($a, $b);
+            }
+            if ($aIsString) {
+                return -1;
+            }
+            if ($bIsString) {
+                return 1;
+            }
+
             return $a <=> $b;
         });
 
@@ -98,9 +106,10 @@ class SeatLayoutService
             return false;
         }
         $rgb = $fill->getStartColor()->getRGB();
-        $r   = hexdec(substr($rgb, 0, 2));
-        $g   = hexdec(substr($rgb, 2, 2));
-        $b   = hexdec(substr($rgb, 4, 2));
+        $r = hexdec(substr($rgb, 0, 2));
+        $g = hexdec(substr($rgb, 2, 2));
+        $b = hexdec(substr($rgb, 4, 2));
+
         // Orange: strong red, moderate green (less than red), low blue
         return $r >= 180 && $g >= 60 && $g < $r && $b < 100;
     }

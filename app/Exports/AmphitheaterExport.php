@@ -4,14 +4,14 @@ namespace App\Exports;
 
 use App\Models\Amphitheater;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class AmphitheaterExport implements FromCollection, WithHeadings, WithTitle, WithStyles, WithColumnWidths
+class AmphitheaterExport implements FromCollection, WithColumnWidths, WithHeadings, WithStyles, WithTitle
 {
     public function __construct(private readonly Amphitheater $amphitheater) {}
 
@@ -21,13 +21,13 @@ class AmphitheaterExport implements FromCollection, WithHeadings, WithTitle, Wit
             ->students()
             ->orderBySeat()
             ->get()
-            ->map(fn($s) => [
+            ->map(fn ($s) => [
                 'N° Place' => $s->seat_number,
-                'N° CREM'  => $s->crem_number ?? '—',
-                'Nom'      => strtoupper($s->last_name),
-                'Prénom'   => $s->first_name,
-                'Amphi'    => $this->amphitheater->name,
-                'Tarif'    => $s->tier_name,
+                'N° CREM' => $s->crem_number ?? '—',
+                'Nom' => strtoupper($s->last_name),
+                'Prénom' => $s->first_name,
+                'Amphi' => $this->amphitheater->name,
+                'Tarif' => $s->tier_name,
             ]);
     }
 

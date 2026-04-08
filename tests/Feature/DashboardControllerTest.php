@@ -55,9 +55,9 @@ class DashboardControllerTest extends TestCase
     public function test_dashboard_shows_last_sync_info(): void
     {
         SyncLog::create([
-            'started_at'  => now()->subMinutes(5),
+            'started_at' => now()->subMinutes(5),
             'finished_at' => now()->subMinutes(4),
-            'status'      => 'success',
+            'status' => 'success',
             'new_records' => 3,
             'updated_records' => 1,
         ]);
@@ -68,10 +68,10 @@ class DashboardControllerTest extends TestCase
     public function test_dashboard_shows_failed_sync_warning(): void
     {
         SyncLog::create([
-            'started_at'   => now()->subMinutes(5),
-            'finished_at'  => now()->subMinutes(4),
-            'status'       => 'failed',
-            'new_records'  => 0,
+            'started_at' => now()->subMinutes(5),
+            'finished_at' => now()->subMinutes(4),
+            'status' => 'failed',
+            'new_records' => 0,
             'updated_records' => 0,
             'error_message' => 'Timeout',
         ]);

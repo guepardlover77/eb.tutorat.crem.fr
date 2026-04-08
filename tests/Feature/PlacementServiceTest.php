@@ -7,7 +7,6 @@ namespace Tests\Feature;
 use App\Models\Amphitheater;
 use App\Models\Student;
 use App\Services\PlacementService;
-use Database\Factories\AmphitheaterFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,7 +19,7 @@ class PlacementServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new PlacementService();
+        $this->service = new PlacementService;
         $this->seedAmphis();
     }
 
@@ -50,15 +49,16 @@ class PlacementServiceTest extends TestCase
     private function makeStudent(array $attrs = []): Student
     {
         static $itemId = 0;
+
         return Student::create(array_merge([
             'helloasso_item_id' => ++$itemId,
-            'first_name'        => 'Test',
-            'last_name'         => 'Student',
-            'email'             => "student{$itemId}@test.com",
-            'tier_name'         => 'LAS 1 - INSCRITS au Tutorat',
-            'crem_number'       => '1000' . $itemId,
-            'is_excluded'       => false,
-            'is_manually_placed'=> false,
+            'first_name' => 'Test',
+            'last_name' => 'Student',
+            'email' => "student{$itemId}@test.com",
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
+            'crem_number' => '1000'.$itemId,
+            'is_excluded' => false,
+            'is_manually_placed' => false,
         ], $attrs));
     }
 
@@ -69,7 +69,7 @@ class PlacementServiceTest extends TestCase
     public function test_run_places_las1_members_in_debre(): void
     {
         $student = $this->makeStudent([
-            'tier_name'   => 'LAS 1 - INSCRITS au Tutorat',
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
             'crem_number' => '10001',
         ]);
 
@@ -84,7 +84,7 @@ class PlacementServiceTest extends TestCase
     public function test_run_places_las2_members_in_come(): void
     {
         $student = $this->makeStudent([
-            'tier_name'   => 'LAS 2/3 - INSCRITS au Tutorat',
+            'tier_name' => 'LAS 2/3 - INSCRITS au Tutorat',
             'crem_number' => '90001',
         ]);
 
@@ -98,7 +98,7 @@ class PlacementServiceTest extends TestCase
     public function test_run_places_las2_non_members_in_beauchamps(): void
     {
         $student = $this->makeStudent([
-            'tier_name'   => 'LAS 2/3 - NON INSCRITS au Tutorat',
+            'tier_name' => 'LAS 2/3 - NON INSCRITS au Tutorat',
             'crem_number' => null,
         ]);
 
@@ -112,7 +112,7 @@ class PlacementServiceTest extends TestCase
     public function test_run_places_las1_non_members_in_rambaud(): void
     {
         $student = $this->makeStudent([
-            'tier_name'   => 'LAS 1 - NON INSCRITS au Tutorat',
+            'tier_name' => 'LAS 1 - NON INSCRITS au Tutorat',
             'crem_number' => null,
         ]);
 
@@ -126,7 +126,7 @@ class PlacementServiceTest extends TestCase
     public function test_run_does_not_place_excluded_students(): void
     {
         $excluded = $this->makeStudent([
-            'tier_name'   => "Récupération sans passer l'épreuve",
+            'tier_name' => "Récupération sans passer l'épreuve",
             'is_excluded' => true,
         ]);
 
@@ -140,7 +140,7 @@ class PlacementServiceTest extends TestCase
     {
         // Students with 7xxx are excluded at import, but if somehow present, skip
         $student = $this->makeStudent([
-            'tier_name'   => 'LAS 1 - INSCRITS au Tutorat',
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
             'crem_number' => '70001',
         ]);
 
@@ -154,10 +154,10 @@ class PlacementServiceTest extends TestCase
     {
         $amphi = Amphitheater::where('name', 'Côme Bas')->first();
         $manual = $this->makeStudent([
-            'tier_name'          => 'LAS 1 - INSCRITS au Tutorat',
-            'crem_number'        => '10002',
-            'amphitheater_id'    => $amphi->id,
-            'seat_number'        => '1',
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
+            'crem_number' => '10002',
+            'amphitheater_id' => $amphi->id,
+            'seat_number' => '1',
             'is_manually_placed' => true,
         ]);
 
@@ -187,7 +187,7 @@ class PlacementServiceTest extends TestCase
     public function test_run_flags_crem1_with_las2_tier_as_error(): void
     {
         $student = $this->makeStudent([
-            'tier_name'   => 'LAS 2/3 - INSCRITS au Tutorat',
+            'tier_name' => 'LAS 2/3 - INSCRITS au Tutorat',
             'crem_number' => '10001',
         ]);
 
@@ -201,7 +201,7 @@ class PlacementServiceTest extends TestCase
     public function test_run_flags_crem9_with_las1_tier_as_error(): void
     {
         $student = $this->makeStudent([
-            'tier_name'   => 'LAS 1 - INSCRITS au Tutorat',
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
             'crem_number' => '90001',
         ]);
 
@@ -227,14 +227,14 @@ class PlacementServiceTest extends TestCase
     {
         // Same email: one with CREM (adherent), one without
         $withCrem = $this->makeStudent([
-            'email'       => 'same@test.com',
+            'email' => 'same@test.com',
             'crem_number' => '10001',
-            'tier_name'   => 'LAS 1 - INSCRITS au Tutorat',
+            'tier_name' => 'LAS 1 - INSCRITS au Tutorat',
         ]);
         $withoutCrem = $this->makeStudent([
-            'email'       => 'same@test.com',
+            'email' => 'same@test.com',
             'crem_number' => null,
-            'tier_name'   => 'LAS 1 - NON INSCRITS au Tutorat',
+            'tier_name' => 'LAS 1 - NON INSCRITS au Tutorat',
         ]);
 
         $this->service->run();
@@ -267,10 +267,10 @@ class PlacementServiceTest extends TestCase
     public function test_reset_preserves_manual_when_flag_false(): void
     {
         $amphi = Amphitheater::first();
-        $auto   = $this->makeStudent(['amphitheater_id' => $amphi->id, 'seat_number' => '1']);
+        $auto = $this->makeStudent(['amphitheater_id' => $amphi->id, 'seat_number' => '1']);
         $manual = $this->makeStudent([
-            'amphitheater_id'    => $amphi->id,
-            'seat_number'        => '2',
+            'amphitheater_id' => $amphi->id,
+            'seat_number' => '2',
             'is_manually_placed' => true,
         ]);
 
