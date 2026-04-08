@@ -173,4 +173,32 @@ class PlacementControllerTest extends TestCase
 
         $this->assertStringStartsWith('8', $s->fresh()->crem_number);
     }
+
+    // -----------------------------------------------------------------------
+    // Error paths (service throws)
+    // -----------------------------------------------------------------------
+
+    public function test_run_returns_error_flash_when_service_throws(): void
+    {
+        $this->mock(\App\Services\PlacementService::class, function ($mock) {
+            $mock->shouldReceive('run')->andThrow(new \RuntimeException('boom'));
+        });
+
+        $this->actingAs($this->user)
+            ->post('/placement/run')
+            ->assertRedirect('/')
+            ->assertSessionHas('error');
+    }
+
+    public function test_assign_numbers_returns_error_flash_when_service_throws(): void
+    {
+        $this->mock(\App\Services\PlacementService::class, function ($mock) {
+            $mock->shouldReceive('assignAutoNumbers')->andThrow(new \RuntimeException('boom'));
+        });
+
+        $this->actingAs($this->user)
+            ->post('/placement/assign-numbers')
+            ->assertRedirect('/')
+            ->assertSessionHas('error');
+    }
 }

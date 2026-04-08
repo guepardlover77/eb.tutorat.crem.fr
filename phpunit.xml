@@ -16,6 +16,21 @@
         <include>
             <directory>app</directory>
         </include>
+        <exclude>
+            <!-- Laravel Breeze boilerplate — not application-specific logic -->
+            <directory>app/Http/Controllers/Auth</directory>
+            <directory>app/View/Components</directory>
+            <directory>app/Http/Requests</directory>
+            <file>app/Http/Controllers/ProfileController.php</file>
+            <!-- OAuth redirect — requires Socialite mock, no business logic -->
+            <file>app/Http/Controllers/GoogleAuthController.php</file>
+            <!-- External HTTP client — tested indirectly via SyncService mocks -->
+            <file>app/Services/HelloAssoService.php</file>
+            <!-- Requires a real Excel file on disk — not suitable for CI unit tests -->
+            <file>app/Services/SeatLayoutService.php</file>
+            <!-- Artisan commands are thin wrappers around services already tested -->
+            <directory>app/Console/Commands</directory>
+        </exclude>
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>

@@ -8,6 +8,7 @@ use App\Models\Amphitheater;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Tests\TestCase;
 
 class ExportControllerTest extends TestCase
@@ -217,5 +218,54 @@ class ExportControllerTest extends TestCase
             ->get('/export/recuperation-no-option-emails');
 
         $this->assertStringNotContainsString('has-option@test.com', $response->getContent());
+    }
+
+    // -----------------------------------------------------------------------
+    // studentPlacement XLSX download
+    // -----------------------------------------------------------------------
+
+    public function test_student_placement_export_returns_xlsx(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->get('/export/student-placement');
+
+        $response->assertOk();
+        $this->assertStringContainsString(
+            'spreadsheetml',
+            $response->headers->get('content-type') ?? ''
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // allAmphis ZIP download
+    // -----------------------------------------------------------------------
+
+    #[RequiresPhpExtension('zip')]
+    public function test_all_amphi_export_returns_zip_when_no_students_placed(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->get('/export/all');
+
+        $response->assertOk();
+        $this->assertStringContainsString(
+            'zip',
+            $response->headers->get('content-type') ?? ''
+        );
+    }
+
+    #[RequiresPhpExtension('zip')]
+    public function test_all_amphi_export_includes_amphi_files_when_students_placed(): void
+    {
+        $this->makeStudent([
+            'amphitheater_id' => $this->amphi->id,
+            'seat_number' => '1',
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->get('/export/all');
+
+        $response->assertOk();
+        $disposition = $response->headers->get('content-disposition') ?? '';
+        $this->assertStringContainsString('export-complet', $disposition);
     }
 }
