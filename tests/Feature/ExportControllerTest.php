@@ -240,17 +240,13 @@ class ExportControllerTest extends TestCase
     // allAmphis ZIP download
     // -----------------------------------------------------------------------
 
-    #[RequiresPhpExtension('zip')]
-    public function test_all_amphi_export_returns_zip_when_no_students_placed(): void
+    public function test_all_amphi_export_redirects_when_no_students_placed(): void
     {
         $response = $this->actingAs($this->user)
             ->get('/export/all');
 
-        $response->assertOk();
-        $this->assertStringContainsString(
-            'zip',
-            $response->headers->get('content-type') ?? ''
-        );
+        $response->assertRedirect();
+        $response->assertSessionHas('info');
     }
 
     #[RequiresPhpExtension('zip')]

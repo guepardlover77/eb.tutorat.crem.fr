@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\Amphitheater;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\PlacementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -180,7 +181,7 @@ class PlacementControllerTest extends TestCase
 
     public function test_run_returns_error_flash_when_service_throws(): void
     {
-        $this->mock(\App\Services\PlacementService::class, function ($mock) {
+        $this->mock(PlacementService::class, function ($mock) {
             $mock->shouldReceive('run')->andThrow(new \RuntimeException('boom'));
         });
 
@@ -192,7 +193,7 @@ class PlacementControllerTest extends TestCase
 
     public function test_assign_numbers_returns_error_flash_when_service_throws(): void
     {
-        $this->mock(\App\Services\PlacementService::class, function ($mock) {
+        $this->mock(PlacementService::class, function ($mock) {
             $mock->shouldReceive('assignAutoNumbers')->andThrow(new \RuntimeException('boom'));
         });
 

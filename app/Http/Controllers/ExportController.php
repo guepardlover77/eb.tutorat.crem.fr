@@ -69,6 +69,16 @@ class ExportController extends Controller
 
     public function allAmphis()
     {
+        $amphis = Amphitheater::withCount('students as placed_count')
+            ->with('students')
+            ->orderBy('sort_order')
+            ->get()
+            ->filter(fn ($a) => $a->placed_count > 0);
+
+        if ($amphis->isEmpty()) {
+            return back()->with('info', 'Aucun étudiant n\'est encore placé.');
+        }
+
         $zip = new ZipArchive;
         $zipPath = storage_path('app/temp-export-'.time().'.zip');
 
@@ -77,11 +87,7 @@ class ExportController extends Controller
         }
 
         try {
-            foreach (Amphitheater::withCount('students as placed_count')->with('students')->orderBy('sort_order')->get() as $amphi) {
-                if ($amphi->placed_count === 0) {
-                    continue;
-                }
-
+            foreach ($amphis as $amphi) {
                 $slug = Str::slug($amphi->name);
 
                 $zip->addFromString(
